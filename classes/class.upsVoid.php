@@ -1,15 +1,18 @@
 <?php
-class upsVoid {
+
+namespace UPS;
+
+class Void {
 	var $responseXML;
 	var $xmlSent;
 
-	function upsVoid($upsObj) {
+	function __construct($upsObj) {
 		// Must pass the UPS object to this class for it to work
 		$this->ups = $upsObj;
 	}
 
 	function buildRequestXML($ShipmentIdentificationNumber) {
-		$xml = new xmlBuilder();
+		$xml = new \UPS\XMLBuilder();
 		$xml->push('VoidShipmentRequest');
 			$xml->push('Request');
 				$xml->element('RequestAction', '1');
@@ -28,7 +31,7 @@ class upsVoid {
 	}
 
 	function voidMultiShipment($ShipmentIdentificationNumber,$TrackingNumber) {
-		$xml = new xmlBuilder();
+		$xml = new \UPS\XMLBuilder();
 		$xml->push('VoidShipmentRequest');
 			$xml->push('Request');
 				$xml->element('RequestAction', '1');

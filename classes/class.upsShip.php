@@ -1,12 +1,15 @@
 <?php
 
-class upsShip {
+namespace UPS;
+
+class Ship {
+
 	var $buildRequestXML;
 	var $xmlSent;
 	var $responseXML;
 	var $ShipmentDigest;
 
-	function upsShip($upsObj) {
+	function __construct($upsObj) {
 		// Must pass the UPS object to this class for it to work
 		$this->ups = $upsObj;
 	}
@@ -14,7 +17,7 @@ class upsShip {
 	function buildRequestXML() {
 		$xml = $this->ups->access();
 
-		$ShipmentConfirmRequestXML = new xmlBuilder();		
+		$ShipmentConfirmRequestXML = new \UPS\XMLBuilder();
 		$ShipmentConfirmRequestXML->push('ShipmentConfirmRequest');
 		$ShipmentConfirmRequestXML->push('Request');
 		$ShipmentConfirmRequestXML->push('TransactionReference');
@@ -35,7 +38,7 @@ class upsShip {
 				$ShipmentConfirmRequestXML->element('StateProvinceCode', 'MT');
 				$ShipmentConfirmRequestXML->element('PostalCode', '59759');
 			$ShipmentConfirmRequestXML->pop(); // end Address
-		$ShipmentConfirmRequestXML->pop(); // end Shipper 
+		$ShipmentConfirmRequestXML->pop(); // end Shipper
 		$ShipmentConfirmRequestXML->push('ShipTo');
 			$ShipmentConfirmRequestXML->element('CompanyName', 'Pep Boys');
 			$ShipmentConfirmRequestXML->element('AttentionName', 'Manny');
@@ -44,8 +47,8 @@ class upsShip {
 					$ShipmentConfirmRequestXML->element('PhoneDialPlanNumber', '410');
 					$ShipmentConfirmRequestXML->element('PhoneLineNumber', '5551212');
 					$ShipmentConfirmRequestXML->element('PhoneExtension', '1234');
-				$ShipmentConfirmRequestXML->pop(); // end StrurcturedPhoneNumber 
-			$ShipmentConfirmRequestXML->pop(); // end PhoneNumber 
+				$ShipmentConfirmRequestXML->pop(); // end StrurcturedPhoneNumber
+			$ShipmentConfirmRequestXML->pop(); // end PhoneNumber
 			$ShipmentConfirmRequestXML->push('Address');
 				$ShipmentConfirmRequestXML->element('AddressLine1', '201 York Rd');
 				$ShipmentConfirmRequestXML->element('City', 'Timonium');
@@ -58,7 +61,7 @@ class upsShip {
 		$ShipmentConfirmRequestXML->push('Service');
 			$ShipmentConfirmRequestXML->element('Code', '03');
 			$ShipmentConfirmRequestXML->element('Description', 'UPS Ground');
-		$ShipmentConfirmRequestXML->pop(); // end Service 
+		$ShipmentConfirmRequestXML->pop(); // end Service
 		$ShipmentConfirmRequestXML->push('PaymentInformation');
 			$ShipmentConfirmRequestXML->push('Prepaid');
 				$ShipmentConfirmRequestXML->push('BillShipper');
@@ -67,7 +70,7 @@ class upsShip {
 						$ShipmentConfirmRequestXML->element('Number', '4111111111111111');
 						$ShipmentConfirmRequestXML->element('ExpirationDate', '011909');
 					$ShipmentConfirmRequestXML->pop(); // end CreditCard
-				$ShipmentConfirmRequestXML->pop(); // end BillShipper 
+				$ShipmentConfirmRequestXML->pop(); // end BillShipper
 			$ShipmentConfirmRequestXML->pop(); // end Prepaid
 		$ShipmentConfirmRequestXML->pop(); // end PaymentInformation
 		$ShipmentConfirmRequestXML->push('ShipmentServiceOptions');
@@ -126,7 +129,7 @@ class upsShip {
 $ShipmentConfirmRequestXML->pop(); // ShipmentConfirmRequest
 
 		$xml .= $ShipmentConfirmRequestXML->getXml();
-		
+
 		$responseXML = $this->ups->request('ShipConfirm', $xml);
 
 		$this->xmlSent = $xml;
@@ -136,7 +139,7 @@ $ShipmentConfirmRequestXML->pop(); // ShipmentConfirmRequest
 
 	function buildShipmentAcceptXML($ShipmentDigest) {
 
-		$xml = new xmlBuilder();		
+		$xml = new \UPS\XMLBuilder();
 		$xml->push('ShipmentAcceptRequest');
 			$xml->push('Request');
 				$xml->push('TransactionReference');
@@ -150,7 +153,7 @@ $ShipmentConfirmRequestXML->pop(); // ShipmentConfirmRequest
 
 		$ShipmentAcceptXML = $this->ups->access();
 		$ShipmentAcceptXML .= $xml->getXml();
-		
+
 		$responseXML = $this->ups->request('ShipAccept', $ShipmentAcceptXML);
 		$this->responseXML = $responseXML;
 
@@ -158,10 +161,10 @@ $ShipmentConfirmRequestXML->pop(); // ShipmentConfirmRequest
 	}
 
 	function responseArray() {
-		$xmlParser = new upsxmlParser();
+		$xmlParser = new \UPS\XMLParser();
 		$responseArray = $xmlParser->xmlParser($this->responseXML);
 		$responseArray = $xmlParser->getData();
-		return $responseArray;	
+		return $responseArray;
 	}
 
 

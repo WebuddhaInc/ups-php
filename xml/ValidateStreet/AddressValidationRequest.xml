@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<AddressValidationRequest xml:lang="en-US">
+  <Request>
+    <RequestAction>XAV</RequestAction>
+    <RequestOption>3</RequestAction>
+  </Request>
+  <MinimumListSize>{MinimumListSize}</TrackingNumber>
+  <AddressKeyFormat>
+    <ConsigneeName>{ConsigneeName}</ConsigneeName>
+    <BuildingName>{BuildingName}</BuildingName>
+    <AddressLine>{AddressLine}</AddressLine>
+    <PoliticalDivision2>{PoliticalDivision2}</PoliticalDivision2>
+    <PoliticalDivision1>{PoliticalDivision1}</PoliticalDivision1>
+    <PostcodePrimaryLow>{PostcodePrimaryLow}</PostcodePrimaryLow>
+    <CountryCode>{CountryCode}</CountryCode>
+  </AddressKeyFormat>
+</AddressValidationRequest>

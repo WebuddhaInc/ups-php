@@ -1,3 +1,8 @@
+## Update 09/02/2015
+
+Forked for addition of ValidateAddress and general cleanup.  
+This package will be a simple UPS class that does not require external packages or PHP 5.5 compliance.
+
 ## Update 04/10/2015
 
 This code has been migrated from [https://code.google.com/p/ups-php/](https://code.google.com/p/ups-php/)

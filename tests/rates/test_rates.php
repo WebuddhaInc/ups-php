@@ -1,54 +1,54 @@
 <html>
 <body>
 <?php
+
 // Require the main ups class and upsRate
-require('../../classes/class.ups.php');
-require('../../classes/class.upsRate.php');
+require('../../autoload.php');
 
 // Get credentials from a form
 $accessNumber = $_POST['accessNumber'];
 $username = $_POST['username'];
 $password = $_POST['password'];
 
-// If the form is filled out go get a rate from UPS 
+// If the form is filled out go get a rate from UPS
 if ($accessNumber != '' && $username != '' && $password != '') {
-	$upsConnect = new ups("$accessNumber","$username","$password");
+	$upsConnect = new \UPS\Connector("$accessNumber","$username","$password");
 	$upsConnect->setTemplatePath('../../xml/');
 	$upsConnect->setTestingMode(1); // Change this to 0 for production
-	
-	
-	
-	$upsRate = new upsRate($upsConnect);
-	
-	
+
+
+
+	$upsRate = new \UPS\Rate($upsConnect);
+
+
 	# Shop for different services
 	#$upsRate->request(array('Shop' => true));
 	# Return a specific service rate
 	$upsRate->request(array());
 
 	$upsRate->shipper(array('name' => 'mark',
-							 'phone' => '5556568976', 
-							 'shipperNumber' => '123456', 
-							 'address1' => '14 main st', 
-							 'address2' => '', 
-							 'address3' => '', 
-							 'city' => 'Beverly Hills', 
-							 'state' => 'CA', 
-							 'postalCode' => '90210', 
+							 'phone' => '5556568976',
+							 'shipperNumber' => '123456',
+							 'address1' => '14 main st',
+							 'address2' => '',
+							 'address3' => '',
+							 'city' => 'Beverly Hills',
+							 'state' => 'CA',
+							 'postalCode' => '90210',
 							 'country' => 'US'));
 
-	$upsRate->shipTo(array('companyName' => 'mark', 
-							'attentionName' => 'mark', 
-							'phone' => '5554823976', 
-							'address1' => '12 Hollywood Blvd', 
-							'address2' => '', 
-							'address3' => '', 
-							'city' => 'Beverly Hills', 
-							'state' => 'CA', 
-							'postalCode' => '90210', 
+	$upsRate->shipTo(array('companyName' => 'mark',
+							'attentionName' => 'mark',
+							'phone' => '5554823976',
+							'address1' => '12 Hollywood Blvd',
+							'address2' => '',
+							'address3' => '',
+							'city' => 'Beverly Hills',
+							'state' => 'CA',
+							'postalCode' => '90210',
 							'countryCode' => 'US'));
 
-	$upsRate->package(array('description' => 'my description', 
+	$upsRate->package(array('description' => 'my description',
 									'weight' => 5,
 									'code' => '02',
 									'length' => 5,
@@ -56,20 +56,20 @@ if ($accessNumber != '' && $username != '' && $password != '') {
 									'height' => 5,
 									));
 
-	$upsRate->package(array('description' => 'my description', 
+	$upsRate->package(array('description' => 'my description',
 									'weight' => 10,
 									'code' => '02',
 									'length' => 5,
 									'width' => 5,
 									'height' => 5,
 									));
-	
+
 	// $upsRate->rateInformation(array('NegotiatedRatesIndicator' => 'yes')); // Add for negotiated rates
 
 	$upsRate->shipment(array('description' => 'my description','serviceType' => '02'));
 
 	$rateFromUPS = $upsRate->sendRateRequest();
-	
+
 	echo '<h1>UPS Rate Test</h1>';
 	echo '<h2>Rate</h2>';
 	echo $upsRate->returnRate();

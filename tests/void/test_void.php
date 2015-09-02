@@ -1,9 +1,9 @@
 <html>
 <body>
 <?php
-// Require the main ups class and upsRate
-require('../../classes/class.ups.php');
-require('../../classes/class.upsVoid.php');
+
+// // Require the main ups class and upsRate
+require('../../autoload.php');
 
 // Get credentials from a form
 $accessNumber = $_POST['accessNumber'];
@@ -11,17 +11,17 @@ $username = $_POST['username'];
 $password = $_POST['password'];
 $ShipmentIdentificationNumber = $_POST['ShipmentIdentificationNumber'];
 
-// If the form is filled out go get a rate from UPS 
+// If the form is filled out go get a rate from UPS
 if ($accessNumber != '' && $username != '' && $password != '') {
 	//Initiate the main UPS class
-	$upsConnect = new ups("$accessNumber","$username","$password");
+	$upsConnect = new \UPS\Connector("$accessNumber","$username","$password");
 	$upsConnect->setTemplatePath('../../xml/');
 	$upsConnect->setTestingMode(1); // Change this to 0 for production
 	$upsVoid = new upsVoid($upsConnect);
 
 	$upsVoid->buildRequestXML($ShipmentIdentificationNumber);
 
-	echo $upsVoid->responseXML;	
+	echo $upsVoid->responseXML;
 }
 ?>
 

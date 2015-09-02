@@ -1,13 +1,17 @@
 <?php
-class upsTrack {
+
+namespace UPS;
+
+class Track {
+
 	var $xmlSent;
 	var $trackResponse;
-	
-	function upsTrack($upsObj){
+
+	function __construct($upsObj){
 		// Must pass the UPS object to this class for it to work
 		$this->ups = $upsObj;
 	}
-	
+
 	function track($trackingNumber){
 		$xml = $this->ups->access();
 		$xml .= $this->ups->sandwich($this->ups->templatePath.'Tracking/TrackRequest.xml', array('{TRACKING_NUMBER}'), array($trackingNumber));
@@ -17,7 +21,7 @@ class upsTrack {
 
 		$responseXML = $this->ups->request('Track', $xml);
 
-		$xmlParser = new upsxmlParser();
+		$xmlParser = new \UPS\XMLParser();
 		$fromUPS = $xmlParser->xmlparser($responseXML);
 		$fromUPS = $xmlParser->getData();
 

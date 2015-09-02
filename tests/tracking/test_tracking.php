@@ -1,8 +1,9 @@
 <html>
 <body>
 <?php
-require('../../classes/class.ups.php');
-require('../../classes/class.upsTrack.php');
+
+// Require the main ups class and upsRate
+require('../../autoload.php');
 
 // Get credentials from a form
 $accessNumber = $_POST['accessNumber'];
@@ -12,11 +13,11 @@ $trackingNumber = $_POST['tracking'];
 
 // Obviously, replace the values below with your setup.
 if ($accessNumber != '' && $username != '' && $password != '') {
-	$ups_connect = new ups($accessNumber,$username,$password);
+	$ups_connect = new \UPS\Connector($accessNumber,$username,$password);
 $ups_connect->setTemplatePath('../../xml/');
 $ups_connect->setTestingMode(1); //Change this to 0 for production
 
-	$upsTrack = new upsTrack($ups_connect);
+	$upsTrack = new \UPS\Track($ups_connect);
 
 	$tracking_data = $upsTrack->track($trackingNumber);
 	$response = $upsTrack->returnResponseArray();
@@ -25,21 +26,21 @@ $ups_connect->setTestingMode(1); //Change this to 0 for production
 <h2>Tracking Information for <?php echo $trackingNumber; ?></h2>
 <dl>
 	<dt>Status</dt>
-		<dd><?php echo $response['TrackResponse']['Shipment']['Package']['Activity']['Status']['StatusType']['Description']['VALUE']; ?></dd> 	
+		<dd><?php echo $response['TrackResponse']['Shipment']['Package']['Activity']['Status']['StatusType']['Description']['VALUE']; ?></dd>
 	<dt>Shipper Number:</dt>
-		<dd><?php echo $response['TrackResponse']['Shipment']['Shipper']['ShipperNumber']['VALUE']; ?></dd> 
+		<dd><?php echo $response['TrackResponse']['Shipment']['Shipper']['ShipperNumber']['VALUE']; ?></dd>
 	<dt>Ship to Address:</dt>
-		<dd><?php echo $response['TrackResponse']['Shipment']['ShipTo']['Address']['AddressLine1']['VALUE']; ?></dd> 	
-		<dd><?php echo $response['TrackResponse']['Shipment']['ShipTo']['Address']['AddressLine2']['VALUE']; ?></dd> 	
-		<dd><?php echo $response['TrackResponse']['Shipment']['ShipTo']['Address']['City']['VALUE']; ?></dd> 	
-		<dd><?php echo $response['TrackResponse']['Shipment']['ShipTo']['Address']['StateProvinceCode']['VALUE']; ?></dd> 	
-		<dd><?php echo $response['TrackResponse']['Shipment']['ShipTo']['Address']['PostalCode']['VALUE']; ?></dd> 	
-		<dd><?php echo $response['TrackResponse']['Shipment']['ShipTo']['Address']['CountryCode']['VALUE']; ?></dd> 	
+		<dd><?php echo $response['TrackResponse']['Shipment']['ShipTo']['Address']['AddressLine1']['VALUE']; ?></dd>
+		<dd><?php echo $response['TrackResponse']['Shipment']['ShipTo']['Address']['AddressLine2']['VALUE']; ?></dd>
+		<dd><?php echo $response['TrackResponse']['Shipment']['ShipTo']['Address']['City']['VALUE']; ?></dd>
+		<dd><?php echo $response['TrackResponse']['Shipment']['ShipTo']['Address']['StateProvinceCode']['VALUE']; ?></dd>
+		<dd><?php echo $response['TrackResponse']['Shipment']['ShipTo']['Address']['PostalCode']['VALUE']; ?></dd>
+		<dd><?php echo $response['TrackResponse']['Shipment']['ShipTo']['Address']['CountryCode']['VALUE']; ?></dd>
 	<dt>Service</dt>
-		<dd><?php echo $response['TrackResponse']['Shipment']['Service']['Code']['VALUE']; ?></dd> 	
-		<dd><?php echo $response['TrackResponse']['Shipment']['Service']['Description']['VALUE']; ?></dd> 	
-				
-	
+		<dd><?php echo $response['TrackResponse']['Shipment']['Service']['Code']['VALUE']; ?></dd>
+		<dd><?php echo $response['TrackResponse']['Shipment']['Service']['Description']['VALUE']; ?></dd>
+
+
 </dl>
 <h2>UPS Tracking Response Array</h2>
 <pre><?php print_r($upsTrack->returnResponseArray()); ?></pre>
