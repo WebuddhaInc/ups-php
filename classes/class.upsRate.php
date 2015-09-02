@@ -16,26 +16,26 @@ class Rate {
 	var $xmlSent;
 	var $rateResponse;
 
-	function __construct($upsObj) {
+	function __construct($Connector) {
 		// Must pass the UPS object to this class for it to work
-		$this->ups = $upsObj;
+		$this->connector = $Connector;
 	}
 
 	// Main function that puts together all the XML builder function variables.  Builds the final XML for Rate calculation
 	function sendRateRequest() {
 		// First part of XML is the access part,
-		$xml = $this->ups->access();
+		$xml = $this->connector->getAccessRequestXMLString();
 		$content = $this->requestXML;
 
 
 		$content .= $this->shipmentXML;
 
-		$xml .= $this->ups->sandwich($this->ups->templatePath.'Rates/RatingServiceSelection_Main.xml', array('{CONTENT}'), array($content));
+		$xml .= $this->connector->sandwich($this->connector->templatePath.'Rates/RatingServiceSelection_Main.xml', array('{CONTENT}'), array($content));
 
 		# Put the xml send to UPS into a variable so we can call it later for debugging purposes
 		$this->xmlSent = $xml;
 
-		$responseXML = $this->ups->request('Rate', $xml);
+		$responseXML = $this->connector->sendEndpointXML('Rate', $xml);
 		#$xmlParser = new XML2Array();
 		#$fromUPS = $xmlParser->parse($responseXML);
 		$xmlParser = new \UPS\XMLParser();
@@ -49,9 +49,9 @@ class Rate {
 	// Build Request XML
 	function request($params) {
 		if ($params['Shop']) {
-			$request = $this->ups->sandwich($this->ups->templatePath.'Rates/RatingServiceSelection_Request.xml', array('{RATE_OPTION}'), array('Shop'));
+			$request = $this->connector->sandwich($this->connector->templatePath.'Rates/RatingServiceSelection_Request.xml', array('{RATE_OPTION}'), array('Shop'));
 		} else {
-			$request = $this->ups->sandwich($this->ups->templatePath.'Rates/RatingServiceSelection_Request.xml', array('{RATE_OPTION}'), array('Rate'));
+			$request = $this->connector->sandwich($this->connector->templatePath.'Rates/RatingServiceSelection_Request.xml', array('{RATE_OPTION}'), array('Rate'));
 		}
 		$this->requestXML = $request;
 		return $request;
@@ -59,7 +59,7 @@ class Rate {
 
 	// Build the shipment XML
 	function shipment($params) {
-		$shipment = $this->ups->sandwich($this->ups->templatePath.'Rates/RatingServiceSelection_Shipment.xml', array('{SHIPMENT_DESCRIPTION}','{SHIPPING_CODE}','{SHIPMENT_CONTENT}'), array($params['description'],$params['serviceType'],$this->shipperXML. $this->shipToXML. $this->packageXML. $this->rateInformationXML));
+		$shipment = $this->connector->sandwich($this->connector->templatePath.'Rates/RatingServiceSelection_Shipment.xml', array('{SHIPMENT_DESCRIPTION}','{SHIPPING_CODE}','{SHIPMENT_CONTENT}'), array($params['description'],$params['serviceType'],$this->shipperXML. $this->shipToXML. $this->packageXML. $this->rateInformationXML));
 
 		$this->shipmentXML = $shipment;
 		return $shipment;
@@ -69,7 +69,7 @@ class Rate {
 	function rateInformation($params) {
 		$rateInformation = '';
 		if ($params['NegotiatedRatesIndicator'] == 'yes'){
-			$rateInformation = $this->ups->sandwich($this->ups->templatePath.'Rates/RatingServiceSelection_RateInformation.xml', array('{NEGOTIATED_RATES_INDICATOR}'), array(''));
+			$rateInformation = $this->connector->sandwich($this->connector->templatePath.'Rates/RatingServiceSelection_RateInformation.xml', array('{NEGOTIATED_RATES_INDICATOR}'), array(''));
 		}
 		$this->rateInformationXML = $rateInformation;
 		return $rateInformation;
@@ -77,7 +77,7 @@ class Rate {
 
 	// Build the shipper XML
 	function shipper($params) {
-		$shipper = $this->ups->sandwich($this->ups->templatePath.'Rates/RatingServiceSelection_Shipper.xml', array('{SHIPPER_NAME}',
+		$shipper = $this->connector->sandwich($this->connector->templatePath.'Rates/RatingServiceSelection_Shipper.xml', array('{SHIPPER_NAME}',
 			'{SHIPPER_PHONE}',
 			'{SHIPPER_NUMBER}',
 			'{SHIPPER_ADDRESS_1}',
@@ -97,7 +97,7 @@ class Rate {
 
 	// Build the shipTo XML
 	function shipTo($params) {
-		$shipTo = $this->ups->sandwich($this->ups->templatePath.'Rates/RatingServiceSelection_ShipTo.xml', array('{SHIPTO_COMPANY_NAME}',
+		$shipTo = $this->connector->sandwich($this->connector->templatePath.'Rates/RatingServiceSelection_ShipTo.xml', array('{SHIPTO_COMPANY_NAME}',
 			'{SHIPTO_ATTN_NAME}',
 			'{SHIPTO_PHONE}',
 			'{SHIPTO_ADDRESS_1}',
@@ -116,7 +116,7 @@ class Rate {
 
 	// Build the package XML
 	function package($params) {
-		$package = $this->ups->sandwich($this->ups->templatePath.'Rates/RatingServiceSelection_Package.xml', array('{PACKAGE_DESCRIPTION}',
+		$package = $this->connector->sandwich($this->connector->templatePath.'Rates/RatingServiceSelection_Package.xml', array('{PACKAGE_DESCRIPTION}',
 			'{PACKAGING_CODE}','{PACKAGE_SIZE}','{PACKAGE_EXTRAS}'), array($params['description'],$params['code'],$this->packageDimensions(array('length' => $params['length'], 'width' => $params['width'], 'height' => $params['height'])). $this->packageWeight(array('weight' => $params['weight'])),''));
 
 		$this->packageXML .= $package;
@@ -125,7 +125,7 @@ class Rate {
 
 	// Build the packageDimensions XML
 	function packageDimensions($params) {
-		$packageDimensions = $this->ups->sandwich($this->ups->templatePath.'Rates/RatingServiceSelection_PackageDimensions.xml', array('{PACKAGE_LENGTH}',
+		$packageDimensions = $this->connector->sandwich($this->connector->templatePath.'Rates/RatingServiceSelection_PackageDimensions.xml', array('{PACKAGE_LENGTH}',
 			'{PACKAGE_WIDTH}',
 			'{PACKAGE_HEIGHT}'), array($params['length'],$params['width'],$params['height']));
 
@@ -135,7 +135,7 @@ class Rate {
 
 	// Build packageWeight XML
 	function packageWeight($params) {
-		$packageWeight = $this->ups->sandwich($this->ups->templatePath.'Rates/RatingServiceSelection_PackageWeight.xml', array('{PACKAGE_WEIGHT}'), array($params['weight']));
+		$packageWeight = $this->connector->sandwich($this->connector->templatePath.'Rates/RatingServiceSelection_PackageWeight.xml', array('{PACKAGE_WEIGHT}'), array($params['weight']));
 
 		$this->packageWeightXML = $packageWeight;
 		return $packageWeight;
@@ -165,8 +165,9 @@ class Rate {
 		$rateResponse = $this->rateResponse;
 		$error = $rateResponse['RatingServiceSelectionResponse']['Response']['Error']['ErrorDescription']['VALUE'];
 		if ($this->isResponseError()) {
-			$this->ups->throwError("There was an error and UPS said, '$error'.");
-		} else {
+			throw new Exception("There was an error and UPS said, '$error'.");
+		}
+		else {
 			return $rateResponse['RatingServiceSelectionResponse']['RatedShipment']['TotalCharges']['MonetaryValue']['VALUE'];
 		}
 	}
@@ -174,7 +175,6 @@ class Rate {
 	// Find out if there are multiple rates in a response (user is shoping for rates)
 	function isMultipleRates() {
 		$rateResponse = $this->rateResponse;
-
 		if ($rateResponse['RatingServiceSelectionResponse']['RatedShipment'][0] == null) { //If there is a value here there are multiple rates
 			return false;
 		} else {
@@ -182,6 +182,4 @@ class Rate {
 		}
 	}
 
-
 }
-?>

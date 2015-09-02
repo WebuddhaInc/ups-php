@@ -3,12 +3,13 @@
 namespace UPS;
 
 class Void {
+
 	var $responseXML;
 	var $xmlSent;
 
-	function __construct($upsObj) {
+	function __construct($Connector) {
 		// Must pass the UPS object to this class for it to work
-		$this->ups = $upsObj;
+		$this->connector = $Connector;
 	}
 
 	function buildRequestXML($ShipmentIdentificationNumber) {
@@ -20,10 +21,10 @@ class Void {
 			$xml->element('ShipmentIdentificationNumber', $ShipmentIdentificationNumber);
 		$xml->pop(); // end VoidShipmentRequest
 
-		$VoidRequestXML = $this->ups->access();
+		$VoidRequestXML = $this->connector->getAccessRequestXMLString();
 		$VoidRequestXML .= $xml->getXml();
 
-		$responseXML = $this->ups->request('Void', $VoidRequestXML);
+		$responseXML = $this->connector->sendEndpointXML('Void', $VoidRequestXML);
 		$this->responseXML = $responseXML;
 		$this->xmlSent = $VoidRequestXML;
 
@@ -45,10 +46,10 @@ class Void {
 		$xml->pop(); // end VoidShipmentRequest
 
 
-		$voidMultiShipment = $this->ups->access();
+		$voidMultiShipment = $this->connector->getAccessRequestXMLString();
 		$voidMultiShipment .= $xml->getXml();
 
-		$responseXML = $this->ups->request('Void', $voidMultiShipment);
+		$responseXML = $this->connector->sendEndpointXML('Void', $voidMultiShipment);
 		$this->responseXML = $responseXML;
 		$this->xmlSent = $voidMultiShipment;
 

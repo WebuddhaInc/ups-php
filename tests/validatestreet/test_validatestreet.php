@@ -1,6 +1,5 @@
 <html>
 <body>
-<pre>
 <?php
 
 // Require the main ups class and upsRate
@@ -14,24 +13,52 @@ $password     = $_POST['password'];
 // If the form is filled out go get a rate from UPS
 if ($accessNumber != '' && $username != '' && $password != '') {
 
-  //Initiate the main UPS class
+  /**
+   * Initialize Connector
+   * @var [type]
+   */
   $upsConnect = new \UPS\Connector($accessNumber, $username, $password);
-  $upsConnect->setTemplatePath('../../xml/');
-  $upsConnect->setTestingMode(1); // Change this to 0 for production
+  $upsConnect->setTestingMode( false );
 
-  $upsValidateStreet = new \UPS\ValidateStreet($upsConnect);
-  $upsValidateStreet->buildRequestXML(array(
-    'AddressLine' => array(),
-    'PoliticalDivision2' => '',
-    'PoliticalDivision1' => '',
-    'PostcodePrimaryLow' => '',
-    'CountryCode' => ''
+  /**
+   * Initialize Request Class
+   * @var [type]
+   */
+  $upsValidateStreet = new \UPS\ValidateStreet( $upsConnect );
+
+  /**
+   * Process Request
+   * @var [type]
+   */
+  $res = $upsValidateStreet->validateAddress(array(
+
+    /*
+
+    Test Environment only works with some states
+
+    'AddressLine1'       => 'AIR ROAD SUITE 7',
+    'AddressLine2'       => '',
+    'AddressLine3'       => '',
+    'PoliticalDivision2' => 'SAN DIEGO',
+    'PoliticalDivision1' => 'CA',
+    'PostcodePrimaryLow' => '92154',
+    'CountryCode'        => 'US'
+
+    */
+
+    'AddressLine1'       => '3900 Menlo Dr.',
+    'AddressLine2'       => '',
+    'AddressLine3'       => '',
+    'PoliticalDivision2' => 'Atlanta',
+    'PoliticalDivision1' => 'GA',
+    'PostcodePrimaryLow' => '30340',
+    'CountryCode'        => 'US'
+
     ));
 
-  echo $upsValidateStreet->responseXML;
 }
-?>
 
+?>
 <h2>XML Sent to UPS</h2>
 <pre><?php echo htmlspecialchars($upsVoid->xmlSent); ?></pre>
 
@@ -41,5 +68,16 @@ if ($accessNumber != '' && $username != '' && $password != '') {
   Password: <input type="password" name="password" value="<?php echo $password; ?>" /><br />
   <input type="submit" name="submit" /><br />
 </form>
+
+<pre><?php
+
+  print_r(array(
+    $res->isError(),
+    $res->getMessage(),
+    $res
+    ));
+
+?></pre>
+
 </body>
 </html>

@@ -9,13 +9,13 @@ class Ship {
 	var $responseXML;
 	var $ShipmentDigest;
 
-	function __construct($upsObj) {
+	function __construct($Connector) {
 		// Must pass the UPS object to this class for it to work
-		$this->ups = $upsObj;
+		$this->connector = $Connector;
 	}
 
 	function buildRequestXML() {
-		$xml = $this->ups->access();
+		$xml = $this->connector->getAccessRequestXMLString();
 
 		$ShipmentConfirmRequestXML = new \UPS\XMLBuilder();
 		$ShipmentConfirmRequestXML->push('ShipmentConfirmRequest');
@@ -130,7 +130,7 @@ $ShipmentConfirmRequestXML->pop(); // ShipmentConfirmRequest
 
 		$xml .= $ShipmentConfirmRequestXML->getXml();
 
-		$responseXML = $this->ups->request('ShipConfirm', $xml);
+		$responseXML = $this->connector->sendEndpointXML('ShipConfirm', $xml);
 
 		$this->xmlSent = $xml;
 		$this->responseXML = $responseXML;
@@ -151,10 +151,10 @@ $ShipmentConfirmRequestXML->pop(); // ShipmentConfirmRequest
 		$xml->element('ShipmentDigest', $ShipmentDigest);
 		$xml->pop(); // end ShipmentAcceptRequest
 
-		$ShipmentAcceptXML = $this->ups->access();
+		$ShipmentAcceptXML = $this->connector->getAccessRequestXMLString();
 		$ShipmentAcceptXML .= $xml->getXml();
 
-		$responseXML = $this->ups->request('ShipAccept', $ShipmentAcceptXML);
+		$responseXML = $this->connector->sendEndpointXML('ShipAccept', $ShipmentAcceptXML);
 		$this->responseXML = $responseXML;
 
 		return $ShipmentAcceptXML;

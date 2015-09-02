@@ -2,17 +2,20 @@
 
 namespace UPS;
 
-class ValidateStreet {
+class ValidateStreet extends Request {
 	var $responseXML;
 	var $xmlSent;
 
-	function __construct($upsObj) {
+	function __construct($Connector) {
 		// Must pass the UPS object to this class for it to work
-		$this->ups = $upsObj;
+		$this->connector = $Connector;
 	}
 
 	function buildRequestXML( $address ) {
 
+ 		/**
+ 		 * Build XML
+ 		 */
  		$xml = new \UPS\XMLBuilder();
 		$xml->push('AddressValidationRequest', array('xml:lang' => 'en-US'));
 			$xml->push('Request');
@@ -31,39 +34,51 @@ class ValidateStreet {
 			$xml->pop(); // end AddressKeyFormat
 		$xml->pop(); // end AddressValidationRequest
 
-		$RequestXML = $this->ups->access();
+		/**
+		 * Process Request
+		 * @var [type]
+		 */
+		$RequestXML = $this->connector->getAccessRequestXMLString();
 		$RequestXML .= $xml->getXml();
+		print_r($RequestXML);die();
+		$responseXML = $this->connector->sendEndpointXML('XAV', $RequestXML);
 
-		$responseXML = $this->ups->request('XAV', $RequestXML);
 		$this->responseXML = $responseXML;
 		$this->xmlSent = $RequestXML;
-
 		return $RequestXML;
 	}
 
-	function validateAddress( $address ) {
-		$xml = new \UPS\XMLBuilder();
-		$xml->push('VoidShipmentRequest');
-			$xml->push('Request');
-				$xml->element('RequestAction', '1');
-			$xml->pop(); // end Request
-		$xml->push('ExpandedVoidShipment');
-			$xml->element('ShipmentIdentificationNumber', $ShipmentIdentificationNumber);
-			foreach ($TrackingNumber as $tracking) {
-				$xml->element('TrackingNumber', $tracking);
-			}
-		$xml->pop(); // end ExpandedVoidShipment
-		$xml->pop(); // end VoidShipmentRequest
+	function validateAddress( $data ) {
 
+ 		/**
+ 		 * Process Request
+ 		 */
+		$response = $this->connector->requestEndpoint('XAV', 'AddressValidationRequest', array_merge(array(
+				'MinimumListSize'    => '3',
+				'ConsigneeName'      => '',
+				'BuildingName'       => '',
+				'AddressLine1'       => '',
+				'AddressLine2'       => '',
+				'AddressLine3'       => '',
+				'PoliticalDivision2' => '',
+				'PoliticalDivision1' => '',
+				'PostcodePrimaryLow' => '',
+				'CountryCode'        => ''
+	 			), $data) );
 
-		$voidMultiShipment = $this->ups->access();
-		$voidMultiShipment .= $xml->getXml();
+ 		/**
+ 		 * Catch Error
+ 		 */
+ 		if( $response->isError() ){
+ 			$this->error = true;
+ 			$this->message = $response->getMessage();
+ 		}
 
-		$responseXML = $this->ups->request('Void', $voidMultiShipment);
-		$this->responseXML = $responseXML;
-		$this->xmlSent = $voidMultiShipment;
+ 		/**
+ 		 * Return
+ 		 */
+		return $response;
 
 	}
-}
 
-?>
+}

@@ -2,13 +2,15 @@
 <AddressValidationRequest xml:lang="en-US">
   <Request>
     <RequestAction>XAV</RequestAction>
-    <RequestOption>3</RequestAction>
+    <RequestOption>3</RequestOption>
   </Request>
-  <MinimumListSize>{MinimumListSize}</TrackingNumber>
+  <MinimumListSize>{MinimumListSize}</MinimumListSize>
   <AddressKeyFormat>
     <ConsigneeName>{ConsigneeName}</ConsigneeName>
     <BuildingName>{BuildingName}</BuildingName>
-    <AddressLine>{AddressLine}</AddressLine>
+    <AddressLine>{AddressLine1}</AddressLine>
+    <AddressLine>{AddressLine2}</AddressLine>
+    <AddressLine>{AddressLine3}</AddressLine>
     <PoliticalDivision2>{PoliticalDivision2}</PoliticalDivision2>
     <PoliticalDivision1>{PoliticalDivision1}</PoliticalDivision1>
     <PostcodePrimaryLow>{PostcodePrimaryLow}</PostcodePrimaryLow>
