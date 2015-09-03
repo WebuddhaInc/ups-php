@@ -3,7 +3,7 @@
 <?php
 
 // Require the main ups class and upsRate
-require('../../autoload.php');
+require('../autoload.php');
 
 // Get credentials from a form
 $accessNumber = $_POST['accessNumber'];
@@ -11,14 +11,14 @@ $username     = $_POST['username'];
 $password     = $_POST['password'];
 
 // If the form is filled out go get a rate from UPS
-if ($accessNumber != '' && $username != '' && $password != '') {
+if( $accessNumber ){
 
   /**
    * Initialize Connector
    * @var [type]
    */
-  $upsConnect = new \UPS\Connector($accessNumber, $username, $password);
-  $upsConnect->setTestingMode( false );
+  $upsConnect = new \UPS\Connector( $accessNumber, $username, $password );
+  $upsConnect->setTestingMode( true );
 
   /**
    * Initialize Request Class
@@ -31,11 +31,8 @@ if ($accessNumber != '' && $username != '' && $password != '') {
    * @var [type]
    */
   $res = $upsValidateStreet->validateAddress(array(
-
-    /*
-
-    Test Environment only works with some states
-
+    'ConsigneeName'      => '',
+    'BuildingName'       => '',
     'AddressLine1'       => 'AIR ROAD SUITE 7',
     'AddressLine2'       => '',
     'AddressLine3'       => '',
@@ -43,24 +40,11 @@ if ($accessNumber != '' && $username != '' && $password != '') {
     'PoliticalDivision1' => 'CA',
     'PostcodePrimaryLow' => '92154',
     'CountryCode'        => 'US'
-
-    */
-
-    'AddressLine1'       => '3900 Menlo Dr.',
-    'AddressLine2'       => '',
-    'AddressLine3'       => '',
-    'PoliticalDivision2' => 'Atlanta',
-    'PoliticalDivision1' => 'GA',
-    'PostcodePrimaryLow' => '30340',
-    'CountryCode'        => 'US'
-
     ));
 
 }
 
 ?>
-<h2>XML Sent to UPS</h2>
-<pre><?php echo htmlspecialchars($upsVoid->xmlSent); ?></pre>
 
 <form action="" method="POST">
   Access Key: <input type="text" name="accessNumber" value="<?php echo $accessNumber; ?>" /><br />
@@ -71,11 +55,15 @@ if ($accessNumber != '' && $username != '' && $password != '') {
 
 <pre><?php
 
-  print_r(array(
-    $res->isError(),
-    $res->getMessage(),
-    $res
-    ));
+  if( $res )
+    print_r(array(
+      'isError',
+      $res->isError(),
+      'getMessage',
+      $res->getMessage(),
+      'Response',
+      $res->get()
+      ));
 
 ?></pre>
 

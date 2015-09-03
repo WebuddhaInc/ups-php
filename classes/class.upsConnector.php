@@ -7,6 +7,7 @@ class Connector {
   var $License;
   var $User;
   var $Pass;
+
   var $templatePath;
   var $debugMode;
   var $accessRequest;
@@ -72,8 +73,24 @@ class Connector {
     if( is_file($path) ){
       $buffer = file_get_contents($path);
       foreach( $data AS $key => $value ){
+        if( is_array($value) ){
+          if( isset($value['file']) ){
+            $value = $this->getXMLString( $value['file'], $value['data'] );
+          }
+          else if( count($value) && isset($value[0]['file']) ) {
+            $valueRes = '';
+            foreach( $value AS $valueRow ){
+              $valueRes .= $this->getXMLString( $valueRow['file'], $valueRow['data'] );
+            }
+            $value = $valueRes;
+          }
+          else {
+            $value = 'NA';
+          }
+        }
         $buffer = str_replace('{'.$key.'}', $value, $buffer);
       }
+      $buffer = preg_replace('/\{[A-Za-z0-9\_\.]+\}/','',$buffer);
     }
     else {
       throw new Exception("XML File Not Found: $path", 1);
@@ -134,9 +151,9 @@ class Connector {
      * Parse Response
      */
     if( empty($res) ){
-    	return false;
-		}
-		return new \UPS\Response( $res );
+      return false;
+    }
+    return new \UPS\Response( $res );
 
   }
 

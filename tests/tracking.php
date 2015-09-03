@@ -3,7 +3,7 @@
 <?php
 
 // Require the main ups class and upsRate
-require('../../autoload.php');
+require('../autoload.php');
 
 // Get credentials from a form
 $accessNumber = $_POST['accessNumber'];
@@ -11,16 +11,24 @@ $username = $_POST['username'];
 $password = $_POST['password'];
 $trackingNumber = $_POST['tracking'];
 
-// Obviously, replace the values below with your setup.
-if ($accessNumber != '' && $username != '' && $password != '') {
-	$ups_connect = new \UPS\Connector($accessNumber,$username,$password);
-$ups_connect->setTemplatePath('../../xml/');
-$ups_connect->setTestingMode(1); //Change this to 0 for production
+// If the form is filled out go get a rate from UPS
+if( $accessNumber ){
 
-	$upsTrack = new \UPS\Track($ups_connect);
+  /**
+   * Initialize Connector
+   * @var [type]
+   */
+  $upsConnect = new \UPS\Connector( $accessNumber, $username, $password );
+  $upsConnect->setTestingMode( true );
 
+  /**
+   * Initialize Request Class
+   * @var [type]
+   */
+	$upsTrack = new \UPS\Track( $upsConnect );
 	$tracking_data = $upsTrack->track($trackingNumber);
 	$response = $upsTrack->returnResponseArray();
+
 ?>
 
 <h2>Tracking Information for <?php echo $trackingNumber; ?></h2>

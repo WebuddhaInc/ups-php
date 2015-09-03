@@ -1,0 +1,5 @@
+<?xml version="1.0"?>
+<RatingServiceSelectionRequest xml:lang="en-US">
+  {Request}
+  {Shipment}
+</RatingServiceSelectionRequest>

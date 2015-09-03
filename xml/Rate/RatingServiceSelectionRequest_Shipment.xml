@@ -1,0 +1,11 @@
+<Shipment>
+  <Description>{Description}</Description>
+  <Service>
+    <Code>{ServiceCode}</Code>
+  </Service>
+  {Shipper}
+  {ShipFrom}
+  {ShipTo}
+  {Packages}
+  {PickupType}
+</Shipment>

@@ -1,0 +1,21 @@
+<Package>
+	<Description><![CDATA[{Description}]]></Description>
+	<PackagingType>
+		<Code>{PackagingTypeCode}</Code>
+		<Description><![CDATA[{PackagingTypeDescription}]]></Description>
+	</PackagingType>
+  <PackageWeight>
+    <UnitOfMeasurement>
+      <Code>LBS</Code>
+    </UnitOfMeasurement>
+    <Weight>{Weight}</Weight>
+  </PackageWeight>
+  <Dimensions>
+    <UnitOfMeasurement>
+      <Code>IN</Code>
+    </UnitOfMeasurement>
+    <Length>{Length}</Length>
+    <Width>{Width}</Width>
+    <Height>{Height}</Height>
+  </Dimensions>
+</Package>

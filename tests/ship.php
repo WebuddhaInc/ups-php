@@ -3,7 +3,7 @@
 <?php
 
 // Require the main ups class and upsRate
-require('../../autoload.php');
+require('../autoload.php');
 
 // Get credentials from a form
 $accessNumber = $_POST['accessNumber'];

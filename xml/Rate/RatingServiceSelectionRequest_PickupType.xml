@@ -1,0 +1,4 @@
+<PickupType>
+	<Code>{PickupTypeCode}</Code>
+	<Description>{PickupTypeDescription}</Description>
+</PickupType>
