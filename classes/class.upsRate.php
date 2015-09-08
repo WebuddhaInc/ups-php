@@ -32,7 +32,7 @@ class Rate extends Request {
 		/**
 		 * Call getRates
 		 */
-		return $this->getRates();
+		return $this->getRates( $data );
 
 	}
 
@@ -73,20 +73,47 @@ class Rate extends Request {
 		}
 
  		/**
- 		 * Process Request
+ 		 * Prepare ShipTo
  		 */
-		$response = $this->connector->requestEndpoint('Rate', 'RatingServiceSelectionRequest', array(
+		$ShipToData = array_merge(array(
+			'CompanyName'                 => '',
+			'AttentionName'               => '',
+			'PhoneNumber'                 => '',
+			'AddressLine1'                => '',
+			'AddressLine2'                => '',
+			'AddressLine3'                => '',
+			'City'                        => '',
+			'StateProvinceCode'           => '',
+			'PostalCode'                  => '',
+			'CountryCode'                 => '',
+			'ResidentialAddressIndicator' => ''
+ 			), $data['ShipTo']);
+		if( $ShipToData['ResidentialAddressIndicator'] ){
+			$ShipToData['ResidentialAddressIndicator'] = '<ResidentialAddressIndicator>1</ResidentialAddressIndicator>';
+		}
+
+		/**
+		 * Request Rate Type
+		 */
+		if( !isset($data['Request']['RequestOption']) || $data['Request']['RequestOption'] != 'Shop' ){
+			$data['Request'] = array_merge(array(
+				'RequestOption' => 'Rate'
+	 			), $data['Request']);
+		}
+
+		/**
+		 * Request
+		 */
+		$request = array(
 			'Request' => array(
 				'file' => 'Rate/RatingServiceSelectionRequest_Request.xml',
-				'data' => array_merge(array(
-					'RequestOption' => 'Rate'
-		 			), $data['Request'])
+				'data' => $data['Request']
 				),
 			'Shipment' => array(
 				'file' => 'Rate/RatingServiceSelectionRequest_Shipment.xml',
 				'data' => array_merge(array(
-					'Description' => '',
-					'ServiceCode' => ''
+					'Description' => 'Ground Shipment',
+					'ServiceCode' => '02'
 					), $data['Shipment'], array(
 					'Shipper' => array(
 						'file' => 'Rate/RatingServiceSelectionRequest_Shipment_Shipper.xml',
@@ -107,23 +134,17 @@ class Rate extends Request {
 						),
 					'ShipTo' => array(
 						'file' => 'Rate/RatingServiceSelectionRequest_Shipment_ShipTo.xml',
-						'data' => array_merge(array(
-				      'CompanyName'       => '',
-				      'AttentionName'     => '',
-				      'PhoneNumber'       => '',
-				      'AddressLine1'      => '',
-				      'AddressLine2'      => '',
-				      'AddressLine3'      => '',
-				      'City'              => '',
-				      'StateProvinceCode' => '',
-				      'PostalCode'        => '',
-				      'CountryCode'       => '',
-				 			), $data['ShipTo'])
+						'data' => $ShipToData
 						),
 					'Packages' => $Packages
 		 			))
 				)
-			));
+			);
+
+ 		/**
+ 		 * Process Request
+ 		 */
+		$response = $this->connector->requestEndpoint('Rate', 'RatingServiceSelectionRequest', $request);
 
  		/**
  		 * Catch Error

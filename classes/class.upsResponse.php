@@ -9,17 +9,22 @@ class Response {
 
   function __construct( $rawXML ){
 
-    $this->xmlParser = new \UPS\XMLParser( $rawXML );
-
-    $xmlRoot = $this->xmlParser->GetRoot();
-    $xmlData = $this->xmlParser->GetData();
-    if( empty($xmlRoot) || empty($xmlData) || empty($xmlData[$xmlRoot]) ){
-      $this->error = true;
-      $this->message = 'Cannot Parse Response';
+    if( $rawXML ){
+      $this->xmlParser = new \UPS\XMLParser( $rawXML );
+      $xmlRoot = $this->xmlParser->GetRoot();
+      $xmlData = $this->xmlParser->GetData();
+      if( empty($xmlRoot) || empty($xmlData) || empty($xmlData[$xmlRoot]) ){
+        $this->error = true;
+        $this->message = 'Cannot Parse Response';
+      }
+      else if( $this->get($xmlRoot . '/Response/Error') ){
+        $this->error = true;
+        $this->message = $this->get($xmlRoot . '/Response/Error/ErrorDescription/VALUE');
+      }
     }
-    else if( $this->get($xmlRoot . '/Response/Error') ){
+    else {
       $this->error = true;
-      $this->message = $this->get($xmlRoot . '/Response/Error/ErrorDescription/VALUE');
+      $this->message = "Invalid Response / Error Unknown";
     }
 
   }

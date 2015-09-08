@@ -10,5 +10,6 @@
 		<StateProvinceCode><![CDATA[{StateProvinceCode}]]></StateProvinceCode>
 		<PostalCode><![CDATA[{PostalCode}]]></PostalCode>
 		<CountryCode><![CDATA[{CountryCode}]]></CountryCode>
+		{ResidentialAddressIndicator}
 	</Address>
 </ShipTo>

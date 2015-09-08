@@ -31,7 +31,7 @@ class ValidateStreet extends Request {
  		/**
  		 * Catch Error
  		 */
- 		if( $response->isError() ){
+		if( $response->isError() ){
  			$this->error = true;
  			$this->message = $response->getMessage();
  		}

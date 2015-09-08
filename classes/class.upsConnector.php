@@ -150,9 +150,6 @@ class Connector {
     /**
      * Parse Response
      */
-    if( empty($res) ){
-      return false;
-    }
     return new \UPS\Response( $res );
 
   }
@@ -187,7 +184,7 @@ class Connector {
           return false;
         }
         else {
-          $response = strstr($curlReturned, '<?'); // Seperate the html header and the actual XML because we turned CURLOPT_HEADER to 1
+          $response = strstr($curlReturned, '<'); // substr($curlReturned, strpos($curlReturned, "\r\n\r\n")+4); // Seperate the html header and the actual XML because we turned CURLOPT_HEADER to 1
           return $response;
         }
       }
