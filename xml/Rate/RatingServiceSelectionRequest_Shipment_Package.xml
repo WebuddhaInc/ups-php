@@ -18,4 +18,9 @@
     <Width>{Width}</Width>
     <Height>{Height}</Height>
   </Dimensions>
+  <PackageServiceOptions>
+    <InsuredValue>
+      <MonetaryValue>{MonetaryValue}</MonetaryValue>
+    </InsuredValue>
+  </PackageServiceOptions>
 </Package>

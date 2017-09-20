@@ -65,6 +65,7 @@ class Rate extends Request {
 						'Length'                   => '',
 						'Width'                    => '',
 						'Height'                   => '',
+						'MonetaryValue'						 => '0',
 						'PackagingTypeCode'        => '02',
 						'PackagingTypeDescription' => ''
 			 			), $Package)
@@ -144,6 +145,7 @@ class Rate extends Request {
  		/**
  		 * Process Request
  		 */
+ 		// inspect($this->connector);die(__LINE__.': '.__FILE__);
 		$response = $this->connector->requestEndpoint('Rate', 'RatingServiceSelectionRequest', $request);
 
  		/**

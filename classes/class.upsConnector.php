@@ -11,6 +11,7 @@ class Connector {
   var $templatePath;
   var $debugMode;
   var $accessRequest;
+  var $cacheHandler;
 
   /**
    * [__construct description]
@@ -47,12 +48,18 @@ class Connector {
     if($bool == 1){
       $this->debugMode = true;
       $this->connectorUrl = 'https://wwwcie.ups.com'; // Don't put a trailing slash here or world will collide.
+      $this->endpointUrl = 'https://wwwcie.ups.com/webservices/';
     }
     else{
       $this->debugMode = false;
       $this->connectorUrl = 'https://www.ups.com';
+      $this->endpointUrl = 'https://onlinetools.ups.com/webservices/';
     }
     return true;
+  }
+
+  function setCacheHandler( $handler ){
+    $this->cacheHandler = $handler;
   }
 
   /**
@@ -126,6 +133,89 @@ class Connector {
         ));
   }
 
+  function requestSoapEndpoint( $endpoint, $request, $function = null ){
+
+    /**
+     * Get Cache
+     */
+    if ($this->cacheHandler) {
+      if ($cached = $this->cacheHandler->getCache( $endpoint, $request )) {
+        return $cached;
+      }
+    }
+
+    /**
+     * Query
+     */
+    try {
+
+      /**
+       * Stage
+       */
+      $wsdl_file = dirname(dirname(__FILE__)) .'/wsdl/'. $endpoint .'.wsdl';
+      $endpoint_url = $this->endpointUrl . $endpoint;
+
+      /**
+       * Initialize
+       */
+        $client = new \SoapClient($wsdl_file, array(
+          'soap_version' => 'SOAP_1_1',  // use soap 1.1 client
+          'trace'        => 1,
+          'exceptions'   => true,
+          ));
+        $client->__setLocation($endpoint_url);
+
+      /**
+       * Security
+       */
+        $UPSSecurity = array(
+          'UsernameToken' => array(
+            'Username' => $this->User,
+            'Password' => $this->Pass
+          ),
+          'ServiceAccessToken' => array(
+            'AccessLicenseNumber' => $this->License
+          )
+        );
+        $header = new \SoapHeader('http://www.ups.com/XMLSchema/XOLTWS/UPSS/v1.0','UPSSecurity',$UPSSecurity);
+        $client->__setSoapHeaders($header);
+
+      /**
+       * Call Endpoint
+       */
+        // $res = $client->__soapCall('ProcessFreightRate', array($request));
+        $res = $client->__soapCall( $function ?: 'Process' . $endpoint, array($request));
+
+    } catch (\SoapFault $fault) {
+
+      $res = $fault->detail->Errors->ErrorDetail->PrimaryErrorCode->Code .': '. $fault->detail->Errors->ErrorDetail->PrimaryErrorCode->Description;
+
+    }
+    catch(\Exception $e) {
+
+      $res = $e->getMessage();
+
+    }
+
+    /**
+     * Parse Response
+     */
+    $response = new \UPS\SoapResponse( $res );
+
+    /**
+     * Cache Response
+     */
+    if ($res && $this->cacheHandler) {
+      $this->cacheHandler->setCache( $endpoint, $request, $response );
+    }
+
+    /**
+     * Return Response
+     */
+    return $response;
+
+  }
+
   /**
    * [requestEndpoint description]
    * @param  [type] $type    [description]
@@ -134,6 +224,15 @@ class Connector {
    * @return [type]          [description]
    */
   function requestEndpoint( $type, $request, $data ){
+
+    /**
+     * Get Cache
+     */
+    if ($this->cacheHandler) {
+      if ($cached = $this->cacheHandler->getCache( $request, $data )) {
+        return $cached;
+      }
+    }
 
     /**
      * Get XML String
@@ -150,7 +249,19 @@ class Connector {
     /**
      * Parse Response
      */
-    return new \UPS\Response( $res );
+    $response = new \UPS\Response( $res );
+
+    /**
+     * Cache Response
+     */
+    if ($res && $this->cacheHandler) {
+      $this->cacheHandler->setCache( $endpoint, $request, $response );
+    }
+
+    /**
+     * Return Response
+     */
+    return $response;
 
   }
 
@@ -160,21 +271,42 @@ class Connector {
    * @param  [type] $xml  [description]
    * @return [type]       [description]
    */
-  function sendEndpointXML( $type, $xml ){
+  function sendEndpointXML( $endpoint, $request ){
+
+    /**
+     * Get Cache
+     */
+    if ($this->cacheHandler) {
+      if ($cached = $this->cacheHandler->getCache( $endpoint, $request )) {
+        return $cached;
+      }
+    }
+
     // This function will return all of the relevant response info in the form of an Array
     if ($this->accessRequest != true) {
       throw new Exception('AccessRequest Not Prepared', 1);
     }
     else {
-      $output = preg_replace('/[\s+]{2,}/', '', $xml);
+      $output = $request;
       $ch = curl_init();
-      curl_setopt($ch, CURLOPT_URL, $this->connectorUrl.'/ups.app/xml/'.$type);
+      curl_setopt($ch, CURLOPT_URL, $this->connectorUrl.'/ups.app/xml/'.$endpoint);
       curl_setopt($ch, CURLOPT_POST, 1);
-      curl_setopt($ch,CURLOPT_TIMEOUT, 60);
       curl_setopt($ch, CURLOPT_HEADER, 1);
+      curl_setopt($ch, CURLOPT_TIMEOUT, 60);
       curl_setopt($ch, CURLOPT_POSTFIELDS, $output);
       curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-      $curlReturned = curl_exec($ch);
+      if (false) {
+        $fh = fopen(__DIR__ . '/curl.log', 'w');
+        curl_setopt($ch, CURLOPT_VERBOSE, 1);
+        curl_setopt($ch, CURLINFO_HEADER_OUT, 1);
+        curl_setopt($ch, CURLOPT_STDERR, $fh);
+        $curlReturned = curl_exec($ch);
+        fwrite(print_r([$curlReturned, curl_curlinfo($ch)], true), $fh);
+        fclose($fh);
+      }
+      else {
+        $curlReturned = curl_exec($ch);
+      }
       curl_close($ch);
       // Find out if the UPS service is down
       preg_match_all('/HTTP\/1\.\d\s(\d+)/',$curlReturned,$matches);
@@ -184,7 +316,22 @@ class Connector {
           return false;
         }
         else {
+
+          /**
+           * Parse Response
+           */
           $response = strstr($curlReturned, '<'); // substr($curlReturned, strpos($curlReturned, "\r\n\r\n")+4); // Seperate the html header and the actual XML because we turned CURLOPT_HEADER to 1
+
+          /**
+           * Cache Response
+           */
+          if ($this->cacheHandler) {
+            $this->cacheHandler->setCache( $endpoint, $request, $response );
+          }
+
+          /**
+           * Return Response
+           */
           return $response;
         }
       }

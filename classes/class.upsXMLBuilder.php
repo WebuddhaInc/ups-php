@@ -52,4 +52,30 @@ class XMLBuilder {
   function getXml() {
     return $this->xml;
   }
+
+  function buildXmlFromArray( $data ) {
+    try {
+      $domtree = new \DOMDocument('1.0');
+      $this->__buildXmlFromArray( $data, $domtree, $domtree );
+      return $domtree->saveHTML();
+    } catch (Exception $e) {
+      die(__LINE__.': '.__FILE__);
+    }
+  }
+  private function __buildXmlFromArray( $data, &$domtree, &$node ) {
+    foreach( $data as $key => $value ) {
+      if( is_numeric($key) ){
+        $key = 'item'.$key; //dealing with <0/>..<n/> issues
+      }
+      if( is_array($value) ) {
+        $subnode = $domtree->createElement($key);
+        $this->__buildXmlFromArray($value, $domtree, $subnode);
+        $node->appendChild($subnode);
+      }
+      else {
+        $node->appendChild($domtree->createElement($key, htmlspecialchars($value)));
+      }
+    }
+  }
+
 }
